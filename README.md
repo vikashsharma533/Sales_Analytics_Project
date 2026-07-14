@@ -164,6 +164,14 @@ python python/02_data_cleaning.py
 python python/03_data_quality_report.py
 python python/04_load_to_sql.py
 ```
+## 💡 Analysis Highlights
+
+- 💰 Generated **12.64M** in total sales and **1.47M** in total profit from **51,290** retail transactions.
+- 🛒 **Technology** was the highest-performing product category, contributing **4.74M** in total sales.
+- 🌏 **APAC** was the leading market with **3.59M** in sales across the analysis period.
+- 👥 Analyzed **25,035** orders, **4,873** customers, and **10,292** products spanning **147** countries.
+- 🧾 The **Average Order Value (AOV)** was **505.01**, providing a benchmark for customer purchasing behavior.
+- 📊 Built SQL-based business analysis and interactive Power BI dashboards to track **Sales**, **Profit**, **Orders**, **Customer Performance**, **Product Performance**, and **Regional Performance**.
 
 ## Author
 
