@@ -1,31 +1,31 @@
+from pathlib import Path
 import pandas as pd
 import pyodbc
 
-# -----------------------------
-# SQL Server Connection
-# -----------------------------
+# Project paths
+project_path = Path(__file__).resolve().parent.parent
+data_file = project_path / "data" / "cleaned" / "superstore_cleaned.csv"
+
+# SQL Server connection
 conn = pyodbc.connect(
     "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=.\\SQLEXPRESS;"
+    "SERVER=.\\SQLEXPRESS;"          # Change if your SQL instance is different
     "DATABASE=SalesAnalyticsDB;"
     "Trusted_Connection=yes;"
 )
 
 cursor = conn.cursor()
 
-# -----------------------------
-# Read Cleaned CSV
-# -----------------------------
-df = pd.read_csv("data/cleaned/superstore_cleaned.csv")
+# Load cleaned dataset
+df = pd.read_csv(data_file)
 
 df["OrderDate"] = pd.to_datetime(df["OrderDate"])
 df["ShipDate"] = pd.to_datetime(df["ShipDate"])
 
-print(f"Loaded {len(df)} rows")
+print(f"Loaded {len(df)} records")
 
-# -----------------------------
-# Customers
-# -----------------------------
+#  Customers 
+
 print("Loading Customers...")
 
 customers = df[["CustomerID", "CustomerName", "Segment"]].drop_duplicates()
@@ -33,10 +33,12 @@ customers = df[["CustomerID", "CustomerName", "Segment"]].drop_duplicates()
 for _, row in customers.iterrows():
     cursor.execute("""
         IF NOT EXISTS (
-            SELECT 1 FROM Customers WHERE CustomerID=?
+            SELECT 1
+            FROM Customers
+            WHERE CustomerID = ?
         )
-        INSERT INTO Customers(CustomerID,CustomerName,Segment)
-        VALUES(?,?,?)
+        INSERT INTO Customers (CustomerID, CustomerName, Segment)
+        VALUES (?, ?, ?)
     """,
     row.CustomerID,
     row.CustomerID,
@@ -45,22 +47,23 @@ for _, row in customers.iterrows():
 
 conn.commit()
 
-# -----------------------------
-# Products
-# -----------------------------
+# Products 
+
 print("Loading Products...")
 
 products = df[
-    ["ProductID","ProductName","Category","SubCategory"]
+    ["ProductID", "ProductName", "Category", "SubCategory"]
 ].drop_duplicates()
 
 for _, row in products.iterrows():
     cursor.execute("""
-        IF NOT EXISTS(
-            SELECT 1 FROM Products WHERE ProductID=?
+        IF NOT EXISTS (
+            SELECT 1
+            FROM Products
+            WHERE ProductID = ?
         )
-        INSERT INTO Products
-        VALUES(?,?,?,?)
+        INSERT INTO Products (ProductID, ProductName, Category, SubCategory)
+        VALUES (?, ?, ?, ?)
     """,
     row.ProductID,
     row.ProductID,
@@ -70,22 +73,24 @@ for _, row in products.iterrows():
 
 conn.commit()
 
-# -----------------------------
-# Orders
-# -----------------------------
+# Orders 
+
 print("Loading Orders...")
 
 orders = df[
-    ["OrderID","OrderDate","ShipDate","ShipMode","OrderPriority"]
+    ["OrderID", "OrderDate", "ShipDate", "ShipMode", "OrderPriority"]
 ].drop_duplicates()
 
 for _, row in orders.iterrows():
     cursor.execute("""
-        IF NOT EXISTS(
-            SELECT 1 FROM Orders WHERE OrderID=?
+        IF NOT EXISTS (
+            SELECT 1
+            FROM Orders
+            WHERE OrderID = ?
         )
         INSERT INTO Orders
-        VALUES(?,?,?,?,?)
+        (OrderID, OrderDate, ShipDate, ShipMode, OrderPriority)
+        VALUES (?, ?, ?, ?, ?)
     """,
     row.OrderID,
     row.OrderID,
@@ -96,29 +101,28 @@ for _, row in orders.iterrows():
 
 conn.commit()
 
-# -----------------------------
-# Locations
-# -----------------------------
+#  Locations
+
 print("Loading Locations...")
 
 locations = df[
-    ["Country","Market","Region","State","City"]
+    ["Country", "Market", "Region", "State", "City"]
 ].drop_duplicates()
 
 for _, row in locations.iterrows():
-
     cursor.execute("""
-        IF NOT EXISTS(
+        IF NOT EXISTS (
             SELECT 1
             FROM Locations
-            WHERE Country=?
-            AND Market=?
-            AND Region=?
-            AND State=?
-            AND City=?
+            WHERE Country = ?
+              AND Market = ?
+              AND Region = ?
+              AND State = ?
+              AND City = ?
         )
         INSERT INTO Locations
-        VALUES(?,?,?,?,?)
+        (Country, Market, Region, State, City)
+        VALUES (?, ?, ?, ?, ?)
     """,
     row.Country,
     row.Market,
@@ -133,40 +137,39 @@ for _, row in locations.iterrows():
 
 conn.commit()
 
-print("Building Location Mapping...")
+print("Creating Location Mapping...")
 
 cursor.execute("""
 SELECT
-LocationID,
-Country,
-Market,
-Region,
-State,
-City
+    LocationID,
+    Country,
+    Market,
+    Region,
+    State,
+    City
 FROM Locations
 """)
 
 location_map = {}
 
-for r in cursor.fetchall():
+for row in cursor.fetchall():
     location_map[
         (
-            r.Country,
-            r.Market,
-            r.Region,
-            r.State,
-            r.City
+            row.Country,
+            row.Market,
+            row.Region,
+            row.State,
+            row.City
         )
-    ] = r.LocationID
+    ] = row.LocationID
 
-# -----------------------------
 # Sales
-# -----------------------------
+
 print("Loading Sales...")
 
 for _, row in df.iterrows():
 
-    locid = location_map[
+    location_id = location_map[
         (
             row.Country,
             row.Market,
@@ -177,18 +180,34 @@ for _, row in df.iterrows():
     ]
 
     cursor.execute("""
-    IF NOT EXISTS(
-        SELECT 1 FROM Sales WHERE RowID=?
-    )
-    INSERT INTO Sales
-    VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
+        IF NOT EXISTS (
+            SELECT 1
+            FROM Sales
+            WHERE RowID = ?
+        )
+        INSERT INTO Sales
+        (
+            RowID,
+            OrderID,
+            CustomerID,
+            ProductID,
+            LocationID,
+            Sales,
+            Quantity,
+            Discount,
+            Profit,
+            ShippingCost,
+            SalesYear,
+            WeekNum
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """,
     row.RowID,
     row.RowID,
     row.OrderID,
     row.CustomerID,
     row.ProductID,
-    locid,
+    location_id,
     row.Sales,
     row.Quantity,
     row.Discount,
@@ -199,8 +218,6 @@ for _, row in df.iterrows():
 
 conn.commit()
 
-print("=================================")
-print("DATA LOADED SUCCESSFULLY")
-print("=================================")
+print("\nData loaded successfully.")
 
 conn.close()

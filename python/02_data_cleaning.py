@@ -1,18 +1,11 @@
 from pathlib import Path
 import pandas as pd
-
-# ===========================
-# Project Paths
-# ===========================
-
 project_root = Path(__file__).resolve().parent.parent
 
 raw_file = project_root / "data" / "raw" / "superstore.csv"
 cleaned_file = project_root / "data" / "cleaned" / "superstore_cleaned.csv"
 
-# ===========================
-# Load Dataset
-# ===========================
+
 
 df = pd.read_csv(raw_file)
 
@@ -22,17 +15,13 @@ print("=" * 60)
 
 print(f"Original Shape : {df.shape}")
 
-# ===========================
-# Remove Unnecessary Column
-# ===========================
+
 
 if "记录数" in df.columns:
     df.drop(columns=["记录数"], inplace=True)
     print("✓ Removed column : 记录数")
 
-# ===========================
-# Rename Columns
-# ===========================
+
 
 df.rename(columns={
     "Order.ID": "OrderID",
@@ -49,24 +38,18 @@ df.rename(columns={
     "Row.ID": "RowID"
 }, inplace=True)
 
-# ===========================
-# Convert Dates
-# ===========================
+
 
 df["OrderDate"] = pd.to_datetime(df["OrderDate"])
 df["ShipDate"] = pd.to_datetime(df["ShipDate"])
 
-# ===========================
-# Final Checks
-# ===========================
+
 
 print(f"Final Shape : {df.shape}")
 print("\nMissing Values")
 print(df.isnull().sum())
 
-# ===========================
-# Save Clean Dataset
-# ===========================
+# Save Clean Datase
 
 df.to_csv(cleaned_file, index=False)
 

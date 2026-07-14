@@ -1,21 +1,16 @@
 from pathlib import Path
 import pandas as pd
 
-# ==========================
-# Paths
-# ==========================
+# Read cleaned dataset
+project_path = Path(__file__).resolve().parent.parent
+data_file = project_path / "data" / "cleaned" / "superstore_cleaned.csv"
 
-project_root = Path(__file__).resolve().parent.parent
+df = pd.read_csv(data_file)
 
-file = project_root / "data" / "cleaned" / "superstore_cleaned.csv"
+print("Data Quality Report")
+print("-" * 30)
 
-df = pd.read_csv(file)
-
-print("=" * 60)
-print("DATA QUALITY REPORT")
-print("=" * 60)
-
-print(f"Rows : {df.shape[0]}")
+print(f"Rows    : {df.shape[0]}")
 print(f"Columns : {df.shape[1]}")
 
 print("\nMissing Values")
@@ -27,5 +22,7 @@ print(df.duplicated().sum())
 print("\nData Types")
 print(df.dtypes)
 
+memory = df.memory_usage(deep=True).sum() / (1024 * 1024)
+
 print("\nMemory Usage")
-print(df.memory_usage(deep=True).sum()/1024/1024,"MB")
+print(f"{memory:.2f} MB")

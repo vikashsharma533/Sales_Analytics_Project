@@ -1,30 +1,26 @@
 from pathlib import Path
 import pandas as pd
 
-# Project Root
-project_root = Path(__file__).resolve().parent.parent
+# Read sales dataset
+base_path = Path(__file__).resolve().parent.parent
+file_path = base_path / "data" / "raw" / "superstore.csv"
 
-# Dataset Path
-csv_path = project_root / "data" / "raw" / "superstore.csv"
+df = pd.read_csv(file_path)
 
-# Read Dataset
-df = pd.read_csv(csv_path)
+print("Sales Data Validation")
+print("-" * 30)
 
-print("=" * 50)
-print("SALES DATA VALIDATION")
-print("=" * 50)
-
-print("\nDataset Shape:")
+print("Dataset Shape:")
 print(df.shape)
 
-print("\nColumns:")
+print("\nColumn Names:")
 print(df.columns.tolist())
 
 print("\nMissing Values:")
 print(df.isnull().sum())
 
-print("\nDuplicate Rows:")
+print("\nDuplicate Records:")
 print(df.duplicated().sum())
 
-print("\nFirst 5 Rows:")
+print("\nFirst 5 Records:")
 print(df.head())
