@@ -114,15 +114,31 @@ Sales_Analytics_Project
 
 ---
 
-## Key Features
+## Business Insights
 
+The dashboard provides a comprehensive view of sales performance across customers, products, regions, and markets.
+
+- Technology products generated the highest overall sales.
+- A small percentage of customers contributed a significant share of revenue.
+- Sales remained consistent across the 2011–2014 analysis period.
+- North America and Europe were among the strongest performing markets.
+- Higher discounts did not always result in higher profits.
+- Customer and product analysis helped identify high-value segments.
+- Interactive filters allow detailed analysis by market, category, customer, and time.
+
+---
+
+## Project Features
+
+- End-to-end sales analytics workflow
 - Data validation using Python
 - Data cleaning and preprocessing
-- SQL Server database design
-- Relational table structure with foreign keys
+- SQL Server relational database design
+- Business-focused SQL analysis
 - Interactive Power BI dashboards
-- Business KPI reporting
-- End-to-end analytics workflow
+- KPI monitoring and performance reporting
+- Customer, product, and regional analysis
+- Version control using Git and GitHub
 
 ---
 
